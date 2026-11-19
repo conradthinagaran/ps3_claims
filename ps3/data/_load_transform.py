@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -29,18 +31,15 @@ def load_transform():
     # load the datasets
     # first row (=column names) uses "", all other rows use ''
     # use '' as quotechar as it is easier to change column names
-    df = pd.read_csv(
-        "https://www.openml.org/data/get_csv/20649148/freMTPL2freq.arff", quotechar="'"
-    )
+    data_dir = Path(__file__).parent
+    df = pd.read_csv(data_dir / "freMTPL2freq.csv", quotechar="'")
 
     # rename column names '"name"' => 'name'
     df = df.rename(lambda x: x.replace('"', ""), axis="columns")
     df["IDpol"] = df["IDpol"].astype(np.int64)
-    df.set_index("IDpol", inplace=True)
+    df = df.set_index("IDpol")
 
-    df_sev = pd.read_csv(
-        "https://www.openml.org/data/get_csv/20649149/freMTPL2sev.arff", index_col=0
-    )
+    df_sev = pd.read_csv(data_dir / "freMTPL2sev.csv", index_col=0)
 
     # join ClaimAmount from df_sev to df:
     #   1. cut ClaimAmount at 100_000
@@ -69,3 +68,8 @@ def load_transform():
     df = df.reset_index()
 
     return df
+
+df = load_transform()
+
+print("Type:", df["IDpol"].dtype)
+print(df["IDpol"].describe())
